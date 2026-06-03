@@ -1,0 +1,11 @@
+/home/kito/Developer/bismuth-server/target-install/release/deps/gix_validate-a82b283837a2fc34.d: /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/lib.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/reference.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/tag.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/submodule.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/path.rs
+
+/home/kito/Developer/bismuth-server/target-install/release/deps/libgix_validate-a82b283837a2fc34.rlib: /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/lib.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/reference.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/tag.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/submodule.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/path.rs
+
+/home/kito/Developer/bismuth-server/target-install/release/deps/libgix_validate-a82b283837a2fc34.rmeta: /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/lib.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/reference.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/tag.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/submodule.rs /home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/path.rs
+
+/home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/lib.rs:
+/home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/reference.rs:
+/home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/tag.rs:
+/home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/submodule.rs:
+/home/kito/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-validate-0.11.2/src/path.rs:
