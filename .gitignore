@@ -1,4 +1,5 @@
 /target
+/target-install
 /result
 /result-lib
 .direnv
