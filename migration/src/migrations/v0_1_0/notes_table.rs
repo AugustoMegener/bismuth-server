@@ -1,14 +1,26 @@
-use sea_orm_migration::{prelude::{ *}, schema::*};
-use crate::{migrations::{UUID_DEFAULT, v0_1_0::{fs_addresses_table::FsAdresses, fs_nodes_table::FsNodes, shard_addresses_table::ShardAddresses}}, util::TableMigration};
+use crate::{
+    migrations::{
+        UUID_DEFAULT,
+        v0_1_0::{
+            fs_addresses_table::FsAdresses, fs_nodes_table::FsNodes,
+            shard_addresses_table::ShardAddresses,
+        },
+    },
+    util::TableMigration,
+};
+use sea_orm_migration::{prelude::*, schema::*};
 
 #[derive(Iden)]
 pub enum Notes {
-    Table, Key, 
+    Table,
+    Key,
 }
 
 #[derive(Iden)]
 enum NoteAddressType {
-   Enum, Filesystem, Shard 
+    Enum,
+    Filesystem,
+    Shard,
 }
 
 pub struct NotesTableMigration;
@@ -24,6 +36,10 @@ impl TableMigration for NotesTableMigration {
             .col(pk_auto("key"))
             .col(uuid_uniq("id").default(Expr::cust(UUID_DEFAULT)))
             .col(text("content"))
-            .col(enumeration("notes_address_type", NoteAddressType::Enum, [NoteAddressType::Filesystem, NoteAddressType::Shard]))
+            .col(enumeration(
+                "notes_address_type",
+                NoteAddressType::Enum,
+                [NoteAddressType::Filesystem, NoteAddressType::Shard],
+            ))
     }
 }

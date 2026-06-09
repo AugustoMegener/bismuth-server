@@ -1,14 +1,17 @@
-use sea_orm_migration::{prelude::{ *}, schema::*};
 use crate::{migrations::UUID_DEFAULT, util::TableMigration};
+use sea_orm_migration::{prelude::*, schema::*};
 
 #[derive(Iden)]
 pub enum Facets {
-    Table, Key,
+    Table,
+    Key,
 }
 
 #[derive(Iden)]
 enum FacetAddressType {
-   Enum, InNote, Shard 
+    Enum,
+    InNote,
+    Shard,
 }
 
 pub struct FacetsTableMigration;
@@ -24,6 +27,10 @@ impl TableMigration for FacetsTableMigration {
             .col(pk_auto("key"))
             .col(uuid_uniq("id").default(Expr::cust(UUID_DEFAULT)))
             .col(text("header_field_name"))
-            .col(enumeration("facet_address_type", FacetAddressType::Enum, [FacetAddressType::InNote, FacetAddressType::Shard]))
+            .col(enumeration(
+                "facet_address_type",
+                FacetAddressType::Enum,
+                [FacetAddressType::InNote, FacetAddressType::Shard],
+            ))
     }
 }

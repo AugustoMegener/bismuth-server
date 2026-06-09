@@ -1,11 +1,12 @@
-use sea_orm_migration::{prelude::{ *}, schema::*};
 use crate::{migrations::UUID_DEFAULT, util::TableMigration};
+use sea_orm_migration::{prelude::*, schema::*};
 
 #[derive(Iden)]
 pub enum FsNodes {
-    Table, Key, ParentNodeKey
+    Table,
+    Key,
+    ParentNodeKey,
 }
-
 
 pub struct FsNodesTableMigration;
 
@@ -17,7 +18,8 @@ impl TableMigration for FsNodesTableMigration {
 
     fn def_table<'a>(&self, table: &'a mut TableCreateStatement) -> &'a mut TableCreateStatement {
         table
-            .col(uuid_uniq("id").default(Expr::cust(UUID_DEFAULT)))
+            .col(pk_auto("key"))
+            .col(string_uniq("id").default(Expr::cust(UUID_DEFAULT)))
             .col(string_uniq("name"))
             .col(date_time_null("creation_time").default(Expr::current_time()))
             .col(date_time_null("last_acess"))
@@ -26,9 +28,9 @@ impl TableMigration for FsNodesTableMigration {
             .col(integer_null("parent_node_key"))
             .foreign_key(
                 ForeignKey::create()
-                    .from(FsNodes::Table, FsNodes::Key)
-                    .to(FsNodes::Table, FsNodes::ParentNodeKey)
-                    .on_delete(ForeignKeyAction::Cascade)
+                    .from(FsNodes::Table, FsNodes::ParentNodeKey)
+                    .to(FsNodes::Table, FsNodes::Key)
+                    .on_delete(ForeignKeyAction::Cascade),
             )
     }
 }

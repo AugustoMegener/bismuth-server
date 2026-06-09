@@ -1,7 +1,6 @@
 use std::alloc::GlobalAlloc;
 
-use sea_orm_migration::{prelude::{ *}, schema::*};
-
+use sea_orm_migration::{prelude::*, schema::*};
 
 pub trait TableMigration: Send + Sync {
     fn get_name(&self) -> String;
@@ -9,7 +8,7 @@ pub trait TableMigration: Send + Sync {
 }
 
 pub enum MigrationEntry {
-    Table(Box<dyn TableMigration + 'static>)
+    Table(Box<dyn TableMigration + 'static>),
 }
 
 pub fn mg_table(table: impl TableMigration + 'static) -> MigrationEntry {
@@ -23,14 +22,17 @@ pub struct CompoundMigration {
 
 #[async_trait::async_trait]
 impl MigrationTrait for CompoundMigration {
-
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         for entry in &self.entries {
             match entry {
                 MigrationEntry::Table(table) => {
-                    manager.create_table(
-                        table.def_table(Table::create().if_not_exists().table(table.get_name())).to_owned()
-                    ).await?;
+                    manager
+                        .create_table(
+                            table
+                                .def_table(Table::create().if_not_exists().table(table.get_name()))
+                                .to_owned(),
+                        )
+                        .await?;
                 }
             }
         }
@@ -41,7 +43,9 @@ impl MigrationTrait for CompoundMigration {
         for entry in self.entries.iter().rev() {
             match entry {
                 MigrationEntry::Table(table) => {
-                    manager.drop_table(Table::drop().table(table.get_name()).to_owned()).await?;
+                    manager
+                        .drop_table(Table::drop().table(table.get_name()).to_owned())
+                        .await?;
                 }
             }
         }
