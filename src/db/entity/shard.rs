@@ -4,9 +4,9 @@ use sea_orm::entity::prelude::*;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name = "shards")]
+#[sea_orm(table_name = "shard")]
 pub struct Model {
-    #[sea_orm(primary_key)]
+    #[sea_orm(primary_key, unique)]
     pub key: i64,
     #[sea_orm(unique)]
     pub id: Uuid,
@@ -14,8 +14,6 @@ pub struct Model {
     pub name: String,
     #[sea_orm(unique)]
     pub parent_shard_key: Option<i64>,
-    #[sea_orm(has_many)]
-    pub shard_addresses: HasMany<super::shard_addresses::Entity>,
     #[sea_orm(
         self_ref,
         relation_enum = "SelfRef",
@@ -24,7 +22,9 @@ pub struct Model {
         on_update = "NoAction",
         on_delete = "Cascade"
     )]
-    pub shards: HasOne<Entity>,
+    pub shard: HasOne<Entity>,
+    #[sea_orm(has_many)]
+    pub shard_addresses: HasMany<super::shard_address::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

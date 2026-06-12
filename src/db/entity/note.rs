@@ -4,9 +4,9 @@ use sea_orm::entity::prelude::*;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name = "notes")]
+#[sea_orm(table_name = "note")]
 pub struct Model {
-    #[sea_orm(primary_key)]
+    #[sea_orm(primary_key, unique)]
     pub key: i64,
     #[sea_orm(unique)]
     pub id: Uuid,
@@ -15,9 +15,9 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub notes_address_type: String,
     #[sea_orm(has_many)]
-    pub in_note_addresses: HasMany<super::in_note_addresses::Entity>,
+    pub in_note_addresses: HasMany<super::in_note_address::Entity>,
     #[sea_orm(has_one)]
-    pub shard_addresses: HasOne<super::shard_addresses::Entity>,
+    pub shard_address: HasOne<super::shard_address::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

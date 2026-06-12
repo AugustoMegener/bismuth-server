@@ -4,9 +4,9 @@ use sea_orm::entity::prelude::*;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name = "facets")]
+#[sea_orm(table_name = "facet")]
 pub struct Model {
-    #[sea_orm(primary_key)]
+    #[sea_orm(primary_key, unique)]
     pub key: i64,
     #[sea_orm(unique)]
     pub id: Uuid,
@@ -15,11 +15,11 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub facet_address_type: String,
     #[sea_orm(has_one)]
-    pub in_note_addresses: HasOne<super::in_note_addresses::Entity>,
+    pub in_note_address: HasOne<super::in_note_address::Entity>,
     #[sea_orm(has_many)]
     pub number_facet_fields: HasMany<super::number_facet_field::Entity>,
     #[sea_orm(has_one)]
-    pub shard_addresses: HasOne<super::shard_addresses::Entity>,
+    pub shard_address: HasOne<super::shard_address::Entity>,
     #[sea_orm(has_many)]
     pub text_facet_fields: HasMany<super::text_facet_field::Entity>,
     #[sea_orm(has_many)]

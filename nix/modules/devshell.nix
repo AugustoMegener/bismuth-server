@@ -15,6 +15,7 @@
         sqlite
         openssl
         pkg-config
+        rust-analyzer
       ];
       shellHook = ''
         export PATH="/home/kito/.cargo/bin:$PATH"

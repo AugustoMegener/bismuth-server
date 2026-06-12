@@ -1,11 +1,11 @@
 use crate::{
-    migrations::v0_1_0::{facets_table::Facets, notes_table::Notes, shards_table::Shards},
+    migrations::v0_1_0::{facets_table::Facet, notes_table::Note, shards_table::Shard},
     util::TableMigration,
 };
 use sea_orm_migration::{prelude::*, schema::*};
 
 #[derive(Iden)]
-pub enum ShardAddresses {
+pub enum ShardAddress {
     Table,
     Key,
     ShardKey,
@@ -22,12 +22,12 @@ enum ShardAddressFor {
     Note,
 }
 
-pub struct ShardAddressesTableMigration;
+pub struct ShardAddressTableMigration;
 
 #[async_trait::async_trait]
-impl TableMigration for ShardAddressesTableMigration {
+impl TableMigration for ShardAddressTableMigration {
     fn get_name(&self) -> String {
-        ShardAddresses::Table.unquoted().to_string()
+        ShardAddress::Table.unquoted().to_string()
     }
 
     fn def_table<'a>(&self, table: &'a mut TableCreateStatement) -> &'a mut TableCreateStatement {
@@ -44,35 +44,35 @@ impl TableMigration for ShardAddressesTableMigration {
             .primary_key(
                 Index::create()
                     .unique()
-                    .col(ShardAddresses::ShardKey)
-                    .col(ShardAddresses::Name)
-                    .col(ShardAddresses::ShardAddressFor),
+                    .col(ShardAddress::ShardKey)
+                    .col(ShardAddress::Name)
+                    .col(ShardAddress::ShardAddressFor),
             )
             .foreign_key(
                 ForeignKey::create()
-                    .from(ShardAddresses::Table, ShardAddresses::ShardKey)
-                    .to(Shards::Table, Shards::Key)
+                    .from(ShardAddress::Table, ShardAddress::ShardKey)
+                    .to(Shard::Table, Shard::Key)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .foreign_key(
                 ForeignKey::create()
-                    .from(ShardAddresses::Table, ShardAddresses::NoteKey)
-                    .to(Notes::Table, Notes::Key),
+                    .from(ShardAddress::Table, ShardAddress::NoteKey)
+                    .to(Note::Table, Note::Key),
             )
             .foreign_key(
                 ForeignKey::create()
-                    .from(ShardAddresses::Table, ShardAddresses::FacetKey)
-                    .to(Facets::Table, Facets::Key),
+                    .from(ShardAddress::Table, ShardAddress::FacetKey)
+                    .to(Facet::Table, Facet::Key),
             )
             .check(
-                Expr::col(ShardAddresses::ShardAddressFor)
+                Expr::col(ShardAddress::ShardAddressFor)
                     .eq("Facet")
-                    .and(Expr::col(ShardAddresses::FacetKey).is_not_null())
-                    .and(Expr::col(ShardAddresses::NoteKey).is_null())
-                    .or(Expr::col(ShardAddresses::ShardAddressFor)
+                    .and(Expr::col(ShardAddress::FacetKey).is_not_null())
+                    .and(Expr::col(ShardAddress::NoteKey).is_null())
+                    .or(Expr::col(ShardAddress::ShardAddressFor)
                         .eq("Note")
-                        .and(Expr::col(ShardAddresses::NoteKey).is_not_null())
-                        .and(Expr::col(ShardAddresses::FacetKey).is_null())),
+                        .and(Expr::col(ShardAddress::NoteKey).is_not_null())
+                        .and(Expr::col(ShardAddress::FacetKey).is_null())),
             )
     }
 }

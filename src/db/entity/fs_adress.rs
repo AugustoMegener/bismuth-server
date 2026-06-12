@@ -4,9 +4,9 @@ use sea_orm::entity::prelude::*;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name = "fs_adresses")]
+#[sea_orm(table_name = "fs_adress")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
+    #[sea_orm(primary_key, auto_increment = false, unique)]
     pub node_key: i64,
     #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
     pub extension: String,
@@ -23,7 +23,7 @@ pub struct Model {
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
-    pub fs_nodes: HasOne<super::fs_nodes::Entity>,
+    pub fs_node: HasOne<super::fs_node::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

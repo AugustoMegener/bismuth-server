@@ -3,7 +3,7 @@ use sea_orm_migration::{
     schema::{integer, pk_auto, text},
 };
 
-use crate::{migrations::v0_1_0::facets_table::Facets, util::TableMigration};
+use crate::{migrations::v0_1_0::facets_table::Facet, util::TableMigration};
 
 pub trait FacetFieldTableMigration {
     fn get_field_name(&self) -> &'static str;
@@ -33,7 +33,7 @@ impl<T: FacetFieldTableMigration + Send + Sync + 'static> TableMigration for T {
                 .foreign_key(
                     ForeignKey::create()
                         .from(Alias::new(self.get_name()), Alias::new("facet_key"))
-                        .to(Facets::Table, Facets::Key),
+                        .to(Facet::Table, Facet::Key),
                 ),
         )
     }

@@ -2,7 +2,7 @@ use crate::{migrations::UUID_DEFAULT, util::TableMigration};
 use sea_orm_migration::{prelude::*, schema::*};
 
 #[derive(Iden)]
-pub enum Shards {
+pub enum Shard {
     Table,
     Key,
     Name,
@@ -14,25 +14,25 @@ pub struct ShardTableMigration;
 #[async_trait::async_trait]
 impl TableMigration for ShardTableMigration {
     fn get_name(&self) -> String {
-        Shards::Table.unquoted().to_string()
+        Shard::Table.unquoted().to_string()
     }
 
     fn def_table<'a>(&self, table: &'a mut TableCreateStatement) -> &'a mut TableCreateStatement {
         table
-            .col(pk_auto(Shards::Key))
+            .col(pk_auto(Shard::Key).unique_key())
             .col(uuid_uniq("id").default(Expr::cust(UUID_DEFAULT)))
-            .col(text(Shards::Name))
-            .col(integer_uniq(Shards::ParentShardKey).null())
+            .col(text(Shard::Name))
+            .col(integer_uniq(Shard::ParentShardKey).null())
             .index(
                 Index::create()
                     .unique()
-                    .col(Shards::Name)
-                    .col(Shards::ParentShardKey),
+                    .col(Shard::Name)
+                    .col(Shard::ParentShardKey),
             )
             .foreign_key(
                 ForeignKey::create()
-                    .from(Shards::Table, Shards::ParentShardKey)
-                    .to(Shards::Table, Shards::Key)
+                    .from(Shard::Table, Shard::ParentShardKey)
+                    .to(Shard::Table, Shard::Key)
                     .on_delete(ForeignKeyAction::Cascade),
             )
     }

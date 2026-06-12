@@ -19,7 +19,7 @@ pub struct Model {
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
-    pub facets: HasOne<super::facets::Entity>,
+    pub facet: HasOne<super::facet::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

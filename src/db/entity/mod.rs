@@ -2,14 +2,15 @@
 
 pub mod prelude;
 
-pub mod facets;
-pub mod fs_adresses;
-pub mod fs_nodes;
-pub mod in_note_addresses;
-pub mod notes;
+pub mod facet;
+pub mod fs_adress;
+pub mod fs_node;
+pub mod fs_node_generation;
+pub mod in_note_address;
+pub mod note;
 pub mod number_facet_field;
-pub mod shard_addresses;
-pub mod shards;
+pub mod shard;
+pub mod shard_address;
 pub mod text_facet_field;
 pub mod timestamp_facet_field;
 pub mod toggle_facet_field;

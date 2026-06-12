@@ -4,7 +4,7 @@ use sea_orm::entity::prelude::*;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name = "in_note_addresses")]
+#[sea_orm(table_name = "in_note_address")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub note_key: i64,
@@ -23,7 +23,7 @@ pub struct Model {
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
-    pub facets: HasOne<super::facets::Entity>,
+    pub facet: HasOne<super::facet::Entity>,
     #[sea_orm(
         belongs_to,
         from = "note_key",
@@ -31,7 +31,7 @@ pub struct Model {
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
-    pub notes: HasOne<super::notes::Entity>,
+    pub note: HasOne<super::note::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

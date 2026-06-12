@@ -4,21 +4,26 @@ use sea_orm::entity::prelude::*;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name = "fs_nodes")]
+#[sea_orm(table_name = "fs_node")]
 pub struct Model {
-    #[sea_orm(primary_key)]
+    #[sea_orm(primary_key, unique)]
     pub key: i64,
     #[sea_orm(unique)]
     pub id: String,
-    #[sea_orm(unique)]
     pub name: String,
-    pub creation_time: Option<DateTime>,
+    pub size: Option<i64>,
+    pub creation_time: DateTime,
     pub last_acess: Option<DateTime>,
     pub last_modf: Option<DateTime>,
     pub last_node_change: Option<DateTime>,
+    pub permission_flags: i64,
+    pub hard_link_amount: i64,
+    pub user_id: i64,
+    pub group_id: i64,
+    pub bsd_flags: i64,
     pub parent_node_key: Option<i64>,
-    #[sea_orm(has_many)]
-    pub fs_adresses: HasMany<super::fs_adresses::Entity>,
+    #[sea_orm(has_one)]
+    pub fs_adress: HasOne<super::fs_adress::Entity>,
     #[sea_orm(
         self_ref,
         relation_enum = "SelfRef",
@@ -27,7 +32,7 @@ pub struct Model {
         on_update = "NoAction",
         on_delete = "Cascade"
     )]
-    pub fs_nodes: HasOne<Entity>,
+    pub fs_node: HasOne<Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}
