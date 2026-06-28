@@ -20,7 +20,7 @@ impl TableMigration for ShardTableMigration {
     fn def_table<'a>(&self, table: &'a mut TableCreateStatement) -> &'a mut TableCreateStatement {
         table
             .col(pk_auto(Shard::Key).unique_key())
-            .col(uuid_uniq("id").default(Expr::cust(UUID_DEFAULT)))
+            .col(text_uniq("id").default(Expr::cust(UUID_DEFAULT)))
             .col(text(Shard::Name))
             .col(integer_uniq(Shard::ParentShardKey).null())
             .index(

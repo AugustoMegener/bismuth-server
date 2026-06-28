@@ -2,6 +2,7 @@ pub use sea_orm_migration::prelude::*;
 
 use crate::migrations::v0_1_0;
 
+pub mod entity;
 mod migrations;
 pub mod util;
 

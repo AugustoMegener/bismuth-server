@@ -8,8 +8,8 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key, unique)]
     pub key: i64,
-    #[sea_orm(unique)]
-    pub id: Uuid,
+    #[sea_orm(column_type = "Text", unique)]
+    pub id: String,
     #[sea_orm(column_type = "Text")]
     pub name: String,
     #[sea_orm(unique)]

@@ -8,12 +8,12 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key, unique)]
     pub key: i64,
-    #[sea_orm(unique)]
-    pub id: Uuid,
+    #[sea_orm(column_type = "Text", unique)]
+    pub id: String,
     #[sea_orm(column_type = "Text")]
     pub content: String,
     #[sea_orm(column_type = "Text")]
-    pub notes_address_type: String,
+    pub note_address_type: String,
     #[sea_orm(has_many)]
     pub in_note_addresses: HasMany<super::in_note_address::Entity>,
     #[sea_orm(has_one)]

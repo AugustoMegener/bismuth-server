@@ -3,8 +3,6 @@ use sea_orm::{Database, DatabaseConnection};
 use std::error::Error;
 use std::sync::OnceLock;
 
-pub mod entity;
-
 pub static DATABASE: OnceLock<DatabaseConnection> = OnceLock::new();
 
 pub async fn init_repo_database(dir_path: &str) -> Result<(), Box<dyn Error>> {

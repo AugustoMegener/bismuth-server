@@ -1,6 +1,9 @@
+use sea_orm::ActiveValue::Set;
+use sea_orm::EntityTrait;
 use sea_orm_migration::schema::{boolean, float, text, timestamp};
 
 use crate::{
+    entity::{fs_node, shard},
     migrations::v0_1_0::{
         facet_fields::SimpleFacetFieldTableMigration, facets_table::FacetTableMigration,
         fs_addresses_table::FsAddressTableMigration,
@@ -9,7 +12,7 @@ use crate::{
         in_note_addresses_table::InNoteAddressesTableMigration, notes_table::NoteTableMigration,
         shard_addresses_table::ShardAddressTableMigration, shards_table::ShardTableMigration,
     },
-    util::{CompoundMigration, mg_table},
+    util::{CompoundMigration, mg_insert, mg_table},
 };
 
 pub mod facet_fields;
@@ -45,6 +48,10 @@ pub fn get() -> CompoundMigration {
             mg_table(FsNodeGenerationTableMigration),
             mg_table(FsAddressTableMigration),
             mg_table(ShardTableMigration),
+            mg_insert(shard::ActiveModel {
+                name: Set(String::from("Trash")),
+                ..Default::default()
+            }),
             mg_table(ShardAddressTableMigration),
         ],
     }

@@ -8,14 +8,14 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false, unique)]
     pub node_key: i64,
-    #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
-    pub extension: String,
     #[sea_orm(column_type = "Text")]
-    pub fs_address_for: String,
+    pub address_for: String,
     #[sea_orm(column_type = "Blob", nullable)]
     pub raw_file_data: Option<Vec<u8>>,
     #[sea_orm(unique)]
     pub note_key: Option<i64>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub symlink_path: Option<String>,
     #[sea_orm(
         belongs_to,
         from = "node_key",

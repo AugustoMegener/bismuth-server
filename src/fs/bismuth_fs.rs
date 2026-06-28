@@ -1,15 +1,43 @@
-use std::{sync::mpsc, time::Duration};
+use std::{
+    collections::HashMap,
+    sync::mpsc::{self},
+    time::Duration,
+};
 
+use crate::fs::request::util::AttrPatch;
 use fuser::{Errno, FileAttr, Filesystem, Generation};
 use log::{error, warn};
-use tokio::{runtime, sync::oneshot, task::block_in_place};
+use sea_orm::ColumnTrait;
+use tokio::{
+    runtime,
+    sync::oneshot::{self, Sender},
+    task::block_in_place,
+};
 
 use crate::fs::request::{BismuthFSRequest, DBFSErr, FSResult};
+use migration::entity::fs_node;
 
 const TTL: Duration = Duration::from_secs(1);
 
 struct BismuthFS {
     sender: mpsc::Sender<BismuthFSRequest>,
+}
+
+impl BismuthFS {
+    fn send<T, F>(&self, message: F) -> FSResult<T>
+    where
+        F: FnOnce(Sender<FSResult<T>>) -> BismuthFSRequest,
+    {
+        let (resp_tx, resp_rx) = oneshot::channel::<FSResult<T>>();
+
+        self.sender
+            .clone()
+            .send(message(resp_tx))
+            .map_err(|_| DBFSErr(Errno::EIO, None))?;
+
+        block_in_place(|| runtime::Handle::current().block_on(resp_rx))
+            .map_err(|_| DBFSErr(Errno::EIO, None))?
+    }
 }
 
 impl Filesystem for BismuthFS {
@@ -30,35 +58,18 @@ impl Filesystem for BismuthFS {
         name: &std::ffi::OsStr,
         reply: fuser::ReplyEntry,
     ) {
-        let (resp_tx, resp_rx) = oneshot::channel::<FSResult<(FileAttr, Generation)>>();
-
         let Some(name_string) = name.to_str() else {
             reply.error(Errno::EBADF);
             return;
         };
 
-        let tx = self.sender.clone();
-
-        if tx
-            .send(BismuthFSRequest::Lookup {
-                parent,
-                name: name_string.to_string(),
-                response: resp_tx,
-            })
-            .is_err()
-        {
-            reply.error(Errno::EIO);
-            return;
-        }
-
-        let Ok(result) = block_in_place(|| runtime::Handle::current().block_on(resp_rx)) else {
-            reply.error(Errno::EIO);
-            return;
-        };
-
-        match result {
+        match self.send(|tx| BismuthFSRequest::Lookup {
+            parent,
+            name: name_string.to_string(),
+            response: tx,
+        }) {
             Ok((attr, gen)) => reply.entry(&TTL, &attr, gen),
-            Err(DBFSErr(erno, dberr)) => {
+            Err(DBFSErr(errno, dberr)) => {
                 if let Some(error) = dberr {
                     error!(
                         "Database error trying to lookup INode({})/{}: {error}",
@@ -66,7 +77,8 @@ impl Filesystem for BismuthFS {
                         name.to_str().unwrap_or("")
                     );
                 }
-                reply.error(erno);
+
+                reply.error(errno);
             }
         };
     }
@@ -78,36 +90,17 @@ impl Filesystem for BismuthFS {
         _fh: Option<fuser::FileHandle>,
         reply: fuser::ReplyAttr,
     ) {
-        let (resp_tx, resp_rx) = oneshot::channel::<FSResult<FileAttr>>();
-
-        let tx = self.sender.clone();
-
-        if tx
-            .send(BismuthFSRequest::GetAttr {
-                ino,
-                response: resp_tx,
-            })
-            .is_err()
-        {
-            reply.error(Errno::EIO);
-            return;
-        }
-
-        let Ok(result) = block_in_place(|| runtime::Handle::current().block_on(resp_rx)) else {
-            reply.error(Errno::EIO);
-            return;
-        };
-
-        match result {
+        match self.send(|tx| BismuthFSRequest::GetAttr { ino, response: tx }) {
             Ok(attr) => reply.attr(&TTL, &attr),
-            Err(DBFSErr(erno, dberr)) => {
+            Err(DBFSErr(errno, dberr)) => {
                 if let Some(error) = dberr {
                     error!(
                         "Database error trying to getattr on INode({}): {error}",
                         ino.0.to_string()
                     );
                 }
-                reply.error(erno);
+
+                reply.error(errno);
             }
         };
     }
@@ -130,16 +123,52 @@ impl Filesystem for BismuthFS {
         flags: Option<fuser::BsdFileFlags>,
         reply: fuser::ReplyAttr,
     ) {
-        warn!(
-            "[Not Implemented] setattr(ino: {ino:#x?}, mode: {mode:?}, uid: {uid:?}, \
-            gid: {gid:?}, size: {size:?}, fh: {fh:?}, flags: {flags:?})"
-        );
-        reply.error(Errno::ENOSYS);
+        match self.send(|tx| BismuthFSRequest::SetAttr {
+            ino,
+            patch: AttrPatch {
+                perm: mode.map(|it| it & 0o7777),
+                uid,
+                gid,
+                size,
+                atime: _atime,
+                mtime: _mtime,
+                ctime: _ctime,
+                fh,
+                crtime: _crtime,
+                chgtime: _chgtime,
+                bkuptime: _bkuptime,
+                flags,
+            },
+            response: tx,
+        }) {
+            Ok(attr) => reply.attr(&TTL, &attr),
+            Err(DBFSErr(errno, dberr)) => {
+                if let Some(error) = dberr {
+                    error!(
+                        "Database error trying to setattr on INode({}): {error}",
+                        ino.0.to_string()
+                    );
+                }
+
+                reply.error(errno);
+            }
+        };
     }
 
     fn readlink(&self, _req: &fuser::Request, ino: fuser::INodeNo, reply: fuser::ReplyData) {
-        warn!("[Not Implemented] readlink(ino: {ino:#x?})");
-        reply.error(Errno::ENOSYS);
+        match self.send(|tx| BismuthFSRequest::ReadLink { ino, response: tx }) {
+            Ok(path) => reply.data(&path),
+            Err(DBFSErr(errno, dberr)) => {
+                if let Some(error) = dberr {
+                    error!(
+                        "Database error trying to read symlink of INode({}): {error}",
+                        ino.0.to_string()
+                    );
+                }
+
+                reply.error(errno);
+            }
+        };
     }
 
     fn mknod(
@@ -152,11 +181,39 @@ impl Filesystem for BismuthFS {
         rdev: u32,
         reply: fuser::ReplyEntry,
     ) {
-        warn!(
-            "[Not Implemented] mknod(parent: {parent:#x?}, name: {name:?}, \
-            mode: {mode}, umask: {umask:#x?}, rdev: {rdev})"
-        );
-        reply.error(Errno::ENOSYS);
+        let _ = rdev;
+
+        let Some(name_string) = name.to_str() else {
+            reply.error(Errno::EBADF);
+            return;
+        };
+
+        match mode & libc::S_IFMT {
+            libc::S_IFREG => {
+                match self.send(|tx| BismuthFSRequest::MkNode {
+                    parent,
+                    name: name_string.to_string(),
+                    user_id: _req.uid(),
+                    group_id: _req.gid(),
+                    perm: mode & !umask,
+                    is_dir: false,
+                    response: tx,
+                }) {
+                    Ok((attr, generation)) => reply.entry(&TTL, &attr, generation),
+                    Err(DBFSErr(errno, dberr)) => {
+                        if let Some(error) = dberr {
+                            error!(
+                                "Database error trying to make INode({})/{name_string} node: {error}",
+                                parent.0.to_string()
+                            );
+                        }
+
+                        reply.error(errno);
+                    }
+                }
+            }
+            _ => reply.error(Errno::EINVAL),
+        }
     }
 
     fn mkdir(
@@ -168,10 +225,37 @@ impl Filesystem for BismuthFS {
         umask: u32,
         reply: fuser::ReplyEntry,
     ) {
-        warn!(
-            "[Not Implemented] mkdir(parent: {parent:#x?}, name: {name:?}, mode: {mode}, umask: {umask:#x?})"
-        );
-        reply.error(Errno::ENOSYS);
+        let Some(name_string) = name.to_str() else {
+            reply.error(Errno::EBADF);
+            return;
+        };
+
+        match mode & libc::S_IFMT {
+            libc::S_IFREG => {
+                match self.send(|tx| BismuthFSRequest::MkNode {
+                    parent,
+                    name: name_string.to_string(),
+                    user_id: _req.uid(),
+                    group_id: _req.gid(),
+                    perm: mode & !umask,
+                    is_dir: true,
+                    response: tx,
+                }) {
+                    Ok((attr, generation)) => reply.entry(&TTL, &attr, generation),
+                    Err(DBFSErr(errno, dberr)) => {
+                        if let Some(error) = dberr {
+                            error!(
+                                "Database error trying to make INode({})/{name_string} dir: {error}",
+                                parent.0.to_string()
+                            );
+                        }
+
+                        reply.error(errno);
+                    }
+                }
+            }
+            _ => reply.error(Errno::EINVAL),
+        }
     }
 
     fn unlink(

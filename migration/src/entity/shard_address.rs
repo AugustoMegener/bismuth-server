@@ -11,7 +11,7 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub name: String,
     #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
-    pub shard_address_for: String,
+    pub address_for: String,
     #[sea_orm(unique)]
     pub facet_key: Option<i64>,
     #[sea_orm(unique)]

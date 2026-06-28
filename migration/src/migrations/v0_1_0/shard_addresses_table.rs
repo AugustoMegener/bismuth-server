@@ -10,7 +10,7 @@ pub enum ShardAddress {
     Key,
     ShardKey,
     Name,
-    ShardAddressFor,
+    AddressFor,
     FacetKey,
     NoteKey,
 }
@@ -35,7 +35,7 @@ impl TableMigration for ShardAddressTableMigration {
             .col(integer_null("shard_key"))
             .col(string("name"))
             .col(enumeration(
-                "shard_address_for",
+                "address_for",
                 ShardAddressFor::Enum,
                 [ShardAddressFor::Facet, ShardAddressFor::Note],
             ))
@@ -46,7 +46,7 @@ impl TableMigration for ShardAddressTableMigration {
                     .unique()
                     .col(ShardAddress::ShardKey)
                     .col(ShardAddress::Name)
-                    .col(ShardAddress::ShardAddressFor),
+                    .col(ShardAddress::AddressFor),
             )
             .foreign_key(
                 ForeignKey::create()
@@ -65,11 +65,11 @@ impl TableMigration for ShardAddressTableMigration {
                     .to(Facet::Table, Facet::Key),
             )
             .check(
-                Expr::col(ShardAddress::ShardAddressFor)
+                Expr::col(ShardAddress::AddressFor)
                     .eq("Facet")
                     .and(Expr::col(ShardAddress::FacetKey).is_not_null())
                     .and(Expr::col(ShardAddress::NoteKey).is_null())
-                    .or(Expr::col(ShardAddress::ShardAddressFor)
+                    .or(Expr::col(ShardAddress::AddressFor)
                         .eq("Note")
                         .and(Expr::col(ShardAddress::NoteKey).is_not_null())
                         .and(Expr::col(ShardAddress::FacetKey).is_null())),

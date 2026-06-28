@@ -20,7 +20,7 @@ impl TableMigration for FsNodeTableMigration {
     fn def_table<'a>(&self, table: &'a mut TableCreateStatement) -> &'a mut TableCreateStatement {
         table
             .col(pk_auto("key").unique_key())
-            .col(string_uniq("id").default(Expr::cust(UUID_DEFAULT)))
+            .col(text_uniq("id").default(Expr::cust(UUID_DEFAULT)))
             .col(string("name"))
             .col(unsigned_null("size"))
             .col(date_time("creation_time").default(Expr::current_time()))

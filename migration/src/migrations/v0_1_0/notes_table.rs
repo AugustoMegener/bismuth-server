@@ -25,10 +25,10 @@ impl TableMigration for NoteTableMigration {
     fn def_table<'a>(&self, table: &'a mut TableCreateStatement) -> &'a mut TableCreateStatement {
         table
             .col(pk_auto("key").unique_key())
-            .col(uuid_uniq("id").default(Expr::cust(UUID_DEFAULT)))
+            .col(text_uniq("id").default(Expr::cust(UUID_DEFAULT)))
             .col(text("content"))
             .col(enumeration(
-                "notes_address_type",
+                "note_address_type",
                 NoteAddressType::Enum,
                 [NoteAddressType::Filesystem, NoteAddressType::Shard],
             ))

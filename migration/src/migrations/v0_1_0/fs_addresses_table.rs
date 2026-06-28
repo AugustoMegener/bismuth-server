@@ -5,15 +5,16 @@ use sea_orm_migration::{prelude::*, schema::*};
 pub enum FsAdress {
     Table,
     NodeKey,
-    Extension,
-    FsAddressFor,
+    AddressFor,
     RawFileData,
+    SymlinkPath,
     NoteKey,
 }
 
 #[derive(Iden)]
 enum FsAddressFor {
     Enum,
+    UnsetFile,
     RawFile,
     Note,
     Symlink,
@@ -29,38 +30,40 @@ impl TableMigration for FsAddressTableMigration {
 
     fn def_table<'a>(&self, table: &'a mut TableCreateStatement) -> &'a mut TableCreateStatement {
         table
-            .col(integer("node_key").unique_key())
-            .col(text("extension"))
+            .col(integer(FsAdress::NodeKey).unique_key().primary_key())
             .col(enumeration(
-                "fs_address_for",
+                FsAdress::AddressFor,
                 FsAddressFor::Enum,
                 [
+                    FsAddressFor::UnsetFile,
                     FsAddressFor::RawFile,
                     FsAddressFor::Note,
                     FsAddressFor::Symlink,
                 ],
             ))
-            .col(blob_null("raw_file_data"))
-            .col(integer_uniq("note_key").null())
-            .primary_key(
-                Index::create()
-                    .unique()
-                    .col(FsAdress::NodeKey)
-                    .col(FsAdress::Extension),
-            )
+            .col(blob_null(FsAdress::RawFileData))
+            .col(integer_uniq(FsAdress::NoteKey).null())
+            .col(text_null(FsAdress::SymlinkPath))
             .foreign_key(
                 ForeignKey::create()
                     .from(FsAdress::Table, FsAdress::NodeKey)
                     .to(FsNode::Table, FsNode::Key),
             )
             .check(
-                Expr::col(FsAdress::FsAddressFor)
+                Expr::col(FsAdress::AddressFor)
                     .eq(FsAddressFor::RawFile.unquoted())
                     .and(Expr::col(FsAdress::NoteKey).is_null())
+                    .and(Expr::col(FsAdress::SymlinkPath).is_null())
                     .and(Expr::col(FsAdress::RawFileData).is_not_null())
-                    .or(Expr::col(FsAdress::FsAddressFor)
+                    .or(Expr::col(FsAdress::AddressFor)
                         .eq(FsAddressFor::Note.unquoted())
                         .and(Expr::col(FsAdress::NoteKey).is_not_null())
+                        .and(Expr::col(FsAdress::SymlinkPath).is_null())
+                        .and(Expr::col(FsAdress::RawFileData).is_null()))
+                    .or(Expr::col(FsAdress::AddressFor)
+                        .eq(FsAddressFor::Symlink.unquoted())
+                        .and(Expr::col(FsAdress::NoteKey).is_null())
+                        .and(Expr::col(FsAdress::SymlinkPath).is_not_null())
                         .and(Expr::col(FsAdress::RawFileData).is_null())),
             )
     }

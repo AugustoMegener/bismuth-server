@@ -25,7 +25,7 @@ impl TableMigration for FacetTableMigration {
     fn def_table<'a>(&self, table: &'a mut TableCreateStatement) -> &'a mut TableCreateStatement {
         table
             .col(pk_auto("key").unique_key())
-            .col(uuid_uniq("id").default(Expr::cust(UUID_DEFAULT)))
+            .col(text_uniq("id").default(Expr::cust(UUID_DEFAULT)))
             .col(text("header_field_name"))
             .col(enumeration(
                 "facet_address_type",
