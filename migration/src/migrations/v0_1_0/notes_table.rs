@@ -28,7 +28,7 @@ impl TableMigration for NoteTableMigration {
             .col(text_uniq("id").default(Expr::cust(UUID_DEFAULT)))
             .col(text("content"))
             .col(enumeration(
-                "note_address_type",
+                "address_type",
                 NoteAddressType::Enum,
                 [NoteAddressType::Filesystem, NoteAddressType::Shard],
             ))

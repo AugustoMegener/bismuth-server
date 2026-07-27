@@ -28,7 +28,7 @@ impl TableMigration for FacetTableMigration {
             .col(text_uniq("id").default(Expr::cust(UUID_DEFAULT)))
             .col(text("header_field_name"))
             .col(enumeration(
-                "facet_address_type",
+                "address_type",
                 FacetAddressType::Enum,
                 [FacetAddressType::InNote, FacetAddressType::Shard],
             ))

@@ -13,7 +13,7 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub content: String,
     #[sea_orm(column_type = "Text")]
-    pub note_address_type: String,
+    pub address_type: String,
     #[sea_orm(has_many)]
     pub in_note_addresses: HasMany<super::in_note_address::Entity>,
     #[sea_orm(has_one)]
